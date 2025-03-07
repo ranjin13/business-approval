@@ -72,9 +72,17 @@ A Laravel 12 application that handles a business approval workflow. The system p
 - **POST /api/orders/{id}/reject** - Reject an order
 - **GET /api/orders/{id}/history** - Get order status history
 
+## Prerequisites
+- PHP 8.2+
+- PostgreSQL 12+
+
 ## Installation
 
 1. Clone the repository
+   ```
+   git clone https://github.com/ranjin13/business-approval.git
+   cd business-approval
+   ```
 2. Install dependencies:
    ```
    composer install
@@ -96,6 +104,17 @@ A Laravel 12 application that handles a business approval workflow. The system p
    ```
    php artisan serve
    ```
+## Database
+- Main Database
+astudio_assessment
+   user: postgres
+   password: password
+- Testing Database
+astudio_assessment_test
+   user: postgres
+   password: password
+
+astudio_assessment_test
 
 ## Factories and Testing
 
