@@ -107,14 +107,14 @@ A Laravel 12 application that handles a business approval workflow. The system p
 ## Database
 - Main Database
    ```
-   database: astudio_assessment
+   database: business_approval
    user: postgres
    password: password
    ```
 - Testing Database
 astudio_assessment_test
    ```
-   database: astudio_assessment_test
+   database: business_approval_test
    user: postgres
    password: password
    ```
