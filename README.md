@@ -1,66 +1,216 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Business Approval Workflow API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel 12 application that handles a business approval workflow. The system processes orders through validation and a basic approval flow.
 
-## About Laravel
+## Business Requirements
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. **Order Processing**
+   - Auto-generate unique order numbers following pattern
+   - Create orders with multiple items
+   - Calculate order totals
+   - Basic 2-steps approval workflow
+   - Track order status changes
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+2. **Business Rules**
+   - Order numbers must be unique and sequential
+   - Orders above $1000 require approval
+   - Orders must have at least one item
+   - Approved orders cannot be modified
+   - Basic order history must be maintained
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+3. **Required Functionality**
+   - Auto-generation of order numbers
+   - Order creation and validation
+   - Total calculation
+   - Approval processing
+   - Status tracking
 
-## Learning Laravel
+## Technical Implementation
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Database Structure
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **Orders Table**
+   - id (primary key)
+   - order_number (unique)
+   - status (enum: draft, pending_approval, approved, rejected)
+   - total_amount
+   - notes
+   - created_by (foreign key to users)
+   - approved_by (foreign key to users, nullable)
+   - approved_at (timestamp, nullable)
+   - created_at, updated_at, deleted_at
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **Order Items Table**
+   - id (primary key)
+   - order_id (foreign key to orders)
+   - product_name
+   - description (nullable)
+   - quantity
+   - unit_price
+   - total_price
+   - created_at, updated_at
 
-## Laravel Sponsors
+3. **Order Status History Table**
+   - id (primary key)
+   - order_id (foreign key to orders)
+   - from_status (enum, nullable)
+   - to_status (enum)
+   - changed_by (foreign key to users)
+   - comments (nullable)
+   - created_at, updated_at
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### API Endpoints
 
-### Premium Partners
+#### Orders
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+- **GET /api/orders** - Get all orders
+- **GET /api/orders/{id}** - Get a specific order with its items
+- **POST /api/orders** - Create a new order
+- **PUT /api/orders/{id}** - Update an existing order
+- **POST /api/orders/{id}/submit** - Submit an order for approval
+- **POST /api/orders/{id}/approve** - Approve an order
+- **POST /api/orders/{id}/reject** - Reject an order
+- **GET /api/orders/{id}/history** - Get order status history
 
-## Contributing
+## Installation
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+1. Clone the repository
+2. Install dependencies:
+   ```
+   composer install
+   ```
+3. Copy the `.env.example` file to `.env` and `.env.testing` configure your database
+4. Generate application key:
+   ```
+   php artisan key:generate
+   ```
+5. Run migrations:
+   ```
+   php artisan migrate
+   ```
+6. (Optional) Seed the database:
+   ```
+   php artisan db:seed
+   ```
+7. Start the development server:
+   ```
+   php artisan serve
+   ```
 
-## Code of Conduct
+## Factories and Testing
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The application includes factories for all models to help with testing and seeding data:
 
-## Security Vulnerabilities
+### Order Factory
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```php
+// Create a basic order
+$order = Order::factory()->create();
 
-## License
+// Create an order in draft status
+$draftOrder = Order::factory()->draft()->create();
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+// Create an order in pending approval status
+$pendingOrder = Order::factory()->pendingApproval()->create();
+
+// Create an order that requires approval (total amount >= 1000)
+$highValueOrder = Order::factory()->requiresApproval()->create();
+
+// Create an approved order
+$approvedOrder = Order::factory()->approved()->create();
+
+// Create a rejected order
+$rejectedOrder = Order::factory()->rejected()->create();
+```
+
+### OrderItem Factory
+
+```php
+// Create a basic order item
+$orderItem = OrderItem::factory()->create();
+
+// Create a high-value item
+$highValueItem = OrderItem::factory()->highValue()->create();
+
+// Create a low-value item
+$lowValueItem = OrderItem::factory()->lowValue()->create();
+
+// Create an order with 3 items
+$order = Order::factory()
+    ->has(OrderItem::factory()->count(3))
+    ->create();
+```
+
+### OrderStatusHistory Factory
+
+```php
+// Create a basic status history record
+$statusHistory = OrderStatusHistory::factory()->create();
+
+// Create a status change to draft
+$draftStatus = OrderStatusHistory::factory()->toDraft()->create();
+
+// Create a status change to pending approval
+$pendingStatus = OrderStatusHistory::factory()->toPendingApproval()->create();
+
+// Create a status change to approved
+$approvedStatus = OrderStatusHistory::factory()->toApproved()->create();
+
+// Create a status change to rejected
+$rejectedStatus = OrderStatusHistory::factory()->toRejected()->create();
+```
+
+## API Request Examples
+
+### Create Order
+
+```json
+POST /api/orders
+{
+  "notes": "Sample order",
+  "user_id": 1,
+  "items": [
+    {
+      "product_name": "Product 1",
+      "description": "Description for product 1",
+      "quantity": 2,
+      "unit_price": 100.00
+    },
+    {
+      "product_name": "Product 2",
+      "description": "Description for product 2",
+      "quantity": 1,
+      "unit_price": 50.00
+    }
+  ]
+}
+```
+
+### Submit Order
+
+```json
+POST /api/orders/1/submit
+{
+  "user_id": 1
+}
+```
+
+### Approve Order
+
+```json
+POST /api/orders/1/approve
+{
+  "user_id": 1,
+  "comments": "Approved by manager"
+}
+```
+
+### Reject Order
+
+```json
+POST /api/orders/1/reject
+{
+  "user_id": 1,
+  "comments": "Budget exceeded"
+}
+```
