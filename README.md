@@ -114,6 +114,9 @@ astudio_assessment_test
    user: postgres
    password: password
 
+## API Documentation
+- https://documenter.getpostman.com/view/8163430/2sAYdoDSYj
+
 astudio_assessment_test
 
 ## Factories and Testing
